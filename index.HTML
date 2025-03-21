@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All-in-One Converter</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+    
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7ff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #007acc;
+            color: white;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #converters {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .tool {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px;
+            width: 280px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out;
+        }
+        .tool:hover {
+            transform: scale(1.05);
+        }
+        button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #005f99;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 10px auto;
+            padding: 8px;
+            border: 2px solid #007acc;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 90%;
+            cursor: pointer;
+            text-align: center;
+        }
+        textarea {
+            width: 90%;
+            height: 80px;
+            border: 2px solid #007acc;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            resize: none;
+        }
+    </style>
+</head>
+</head>
+<body>
+    <header>
+        <h1>All-in-One Converter</h1>
+        <p>Convert images, text, and currencies in one place!</p>
+    </header>
+    
+    <section id="converters">
+        <div class="tool" id="pngToJpg">
+            <h2>PNG to JPG</h2>
+            <input type="file" id="pngInput" accept="image/png">
+            <button onclick="convertPNGtoJPG()">Convert</button>
+            <canvas id="canvas" style="display:none;"></canvas>
+        </div>
+        
+        <div class="tool" id="pngToPdf">
+            <h2>PNG to PDF</h2>
+            <input type="file" id="pngToPdfInput" accept="image/png">
+            <button onclick="convertPNGtoPDF()">Convert</button>
+        </div>
+        
+        <div class="tool" id="jpgToPdf">
+            <h2>JPG to PDF</h2>
+            <input type="file" id="jpgToPdfInput" accept="image/jpeg">
+            <button onclick="convertJPGtoPDF()">Convert</button>
+        </div>
+        
+        <div class="tool" id="voiceToText">
+            <h2>Voice to Text</h2>
+            <button onclick="startVoiceToText()">Start Recording</button>
+            <p id="voiceOutput"></p>
+        </div>
+        
+        <div class="tool" id="textToVoice">
+            <h2>Text to Voice</h2>
+            <textarea id="textInput" placeholder="Enter text..."></textarea>
+            <button onclick="convertTextToVoice()">Convert</button>
+        </div>
+        
+        <div class="tool" id="colorToBW">
+            <h2>Color to B&W</h2>
+            <input type="file" id="bwInput" accept="image/*">
+            <button onclick="convertToBlackWhite()">Convert</button>
+        </div>
+    </section>
+    
+    <script>
+        function convertPNGtoPDF() {
+            const { jsPDF } = window.jspdf;
+            let input = document.getElementById("pngToPdfInput").files[0];
+            if (!input) return alert("Please upload a PNG file.");
+            
+            let reader = new FileReader();
+            reader.onload = function (event) {
+                let pdf = new jsPDF();
+                pdf.addImage(event.target.result, "PNG", 10, 10, 180, 160);
+                pdf.save("converted.pdf");
+            };
+            reader.readAsDataURL(input);
+        }
+        
+        function convertJPGtoPDF() {
+            const { jsPDF } = window.jspdf;
+            let input = document.getElementById("jpgToPdfInput").files[0];
+            if (!input) return alert("Please upload a JPG file.");
+            
+            let reader = new FileReader();
+            reader.onload = function (event) {
+                let pdf = new jsPDF();
+                pdf.addImage(event.target.result, "JPEG", 10, 10, 180, 160);
+                pdf.save("converted.pdf");
+            };
+            reader.readAsDataURL(input);
+        }
+        
+        function startVoiceToText() {
+            let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.onresult = function (event) {
+                document.getElementById("voiceOutput").innerText = event.results[0][0].transcript;
+            };
+            recognition.start();
+        }
+        
+        function convertTextToVoice() {
+            let text = document.getElementById("textInput").value;
+            if (!text) {
+                alert("Please enter text to convert to speech.");
+                return;
+            }
+            
+            let speech = new SpeechSynthesisUtterance(text);
+            speech.lang = "en-US";
+            speech.rate = 1;
+            speech.pitch = 1;
+            
+            window.speechSynthesis.speak(speech);
+        }
+        
+        function convertToBlackWhite() {
+            let input = document.getElementById("bwInput").files[0];
+            if (!input) return alert("Please upload an image.");
+            
+            let reader = new FileReader();
+            reader.onload = function (event) {
+                let img = new Image();
+                img.onload = function () {
+                    let canvas = document.createElement("canvas");
+                    let ctx = canvas.getContext("2d");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    let pixels = imageData.data;
+                    for (let i = 0; i < pixels.length; i += 4) {
+                        let avg = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+                        pixels[i] = pixels[i + 1] = pixels[i + 2] = avg;
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    
+                    let link = document.createElement("a");
+                    link.href = canvas.toDataURL("image/png");
+                    link.download = "black_white.png";
+                    link.click();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(input);
+        }
+    </script>
+</body>
+</html>
